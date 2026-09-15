@@ -1,0 +1,12 @@
+# Linux Native Makefile
+CXX = g++
+CXXFLAGS = -O3 -Wall -Wextra -std=c++14
+LDFLAGS = -lSDL2 -lGL -lGLU -lm
+
+all: voxel_engine_linux
+
+voxel_engine_linux: src/main.cpp src/chunk.cpp src/player.cpp src/world.cpp src/menu.cpp src/renderer.cpp
+	$(CXX) src/main.cpp src/chunk.cpp src/player.cpp src/world.cpp src/menu.cpp src/renderer.cpp -o voxel_engine_linux $(CXXFLAGS) $(LDFLAGS)
+
+clean:
+	rm -f voxel_engine_linux
