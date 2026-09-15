@@ -7,6 +7,7 @@
 #include "player.h"
 #include "world.h"
 #include "menu.h"
+#include "renderer.h"
 
 int main(int, char*[]) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -15,7 +16,7 @@ int main(int, char*[]) {
     }
 
     SDL_Window* window = SDL_CreateWindow(
-        "Voxel Engine Retro - Minecraft 1.0 Style (Athlon XP / GL 2.1)",
+        "Voxel Engine Retro - Minecraft 1.0 Style (Playable Version)",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         800, 600,
         SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
@@ -39,14 +40,14 @@ int main(int, char*[]) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     SDL_GL_SetSwapInterval(1);
 
-    glEnable(GL_DEPTH_TEST);
+    Renderer renderer;
+    renderer.init();
 
     GameState gameState = STATE_MENU;
     Menu menu;
     World world;
     Player player(8.0f, 65.0f, 8.0f);
 
-    // Cargar chunk inicial alrededor del jugador
     world.loadChunk(0, 0);
 
     Uint32 lastTime = SDL_GetTicks();
@@ -95,11 +96,9 @@ int main(int, char*[]) {
             player.update(dt, world);
         }
 
-        // Renderizado
         if (gameState == STATE_MENU) {
             glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            // Aquí se dibujaría el menú principal clásico
         } else {
             glClearColor(0.5f, 0.7f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -123,6 +122,8 @@ int main(int, char*[]) {
                 lookX, lookY, lookZ,
                 0.0f, 1.0f, 0.0f
             );
+
+            renderer.renderWorld(world, player);
         }
 
         SDL_GL_SwapWindow(window);
