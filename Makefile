@@ -4,8 +4,8 @@ LDFLAGS = -Lthird_party/SDL2/lib -lmingw32 -lSDL2main -lSDL2 -lopengl32 -lglu32 
 
 all: voxel_engine.exe
 
-voxel_engine.exe: src/main.cpp src/chunk.cpp src/chunk.h
-	$(CXX) src/main.cpp src/chunk.cpp -o voxel_engine.exe $(CXXFLAGS) $(LDFLAGS)
+voxel_engine.exe: src/main.cpp src/chunk.cpp src/chunk.h src/player.cpp src/player.h
+	$(CXX) src/main.cpp src/chunk.cpp src/player.cpp -o voxel_engine.exe $(CXXFLAGS) $(LDFLAGS)
 
 clean:
 	rm -f voxel_engine.exe SDL2.dll
