@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <GL/gl.h>
 #include <iostream>
+#include "chunk.h"
 
 int main(int, char*[]) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -29,14 +30,18 @@ int main(int, char*[]) {
         return 1;
     }
 
-    // Configurar OpenGL 2.1
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-    SDL_GL_SetSwapInterval(1); // VSync
+    SDL_GL_SetSwapInterval(1);
 
     std::cout << "OpenGL Vendor: " << glGetString(GL_VENDOR) << std::endl;
     std::cout << "OpenGL Renderer: " << glGetString(GL_RENDERER) << std::endl;
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+
+    // Inicializar Chunk de prueba
+    Chunk sampleChunk;
+    sampleChunk.generateTestTerrain();
+    std::cout << "Chunk generado exitosamente con terreno clásico (Dimensiones: 16x256x16)." << std::endl;
 
     bool running = true;
     SDL_Event event;
