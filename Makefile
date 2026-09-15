@@ -1,0 +1,11 @@
+CXX = i686-w64-mingw32-g++
+CXXFLAGS = -march=i686 -mtune=pentium3 -mno-sse -mno-sse2 -O3 -Wall -Wextra -Ithird_party/SDL2/include
+LDFLAGS = -Lthird_party/SDL2/lib -lmingw32 -lSDL2main -lSDL2 -lopengl32 -lglu32 -lm
+
+all: voxel_engine.exe
+
+voxel_engine.exe: src/main.cpp
+	$(CXX) src/main.cpp -o voxel_engine.exe $(CXXFLAGS) $(LDFLAGS)
+
+clean:
+	rm -f voxel_engine.exe SDL2.dll

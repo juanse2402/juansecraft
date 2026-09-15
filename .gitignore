@@ -1,0 +1,5 @@
+/voxel_engine.exe
+/SDL2.dll
+/build/
+/third_party/
+.DS_Store
