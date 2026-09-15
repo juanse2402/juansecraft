@@ -15,11 +15,8 @@ void Renderer::init() {
 void Renderer::renderWorld(const World& world, const Player& /*player*/) {
     for (auto& pair : world.chunks) {
         Chunk* chunk = pair.second;
-        uint64_t key = pair.first;
-
-        // Desempaquetar clave de 64 bits en chunkX y chunkZ
-        int chunkX = (int)(key >> 32);
-        int chunkZ = (int)(key & 0xFFFFFFFF);
+        int chunkX = pair.first.first;
+        int chunkZ = pair.first.second;
 
         int worldStartX = chunkX * CHUNK_SIZE_X;
         int worldStartZ = chunkZ * CHUNK_SIZE_Z;
