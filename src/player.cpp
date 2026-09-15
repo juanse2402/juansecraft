@@ -22,9 +22,9 @@ void Player::mouseMove(int relX, int relY) {
 }
 
 void Player::handleInput(const uint8_t* state, float /*dt*/) {
-    float speed = 4.3f; // Velocidad clásica al caminar en bloques por segundo
+    float speed = 4.3f;
     if (state[SDL_SCANCODE_LSHIFT]) {
-        speed = 5.6f; // Velocidad al correr / volar si aplica
+        speed = 5.6f;
     }
 
     float radYaw = yaw * 3.1415926535f / 180.0f;
@@ -53,7 +53,6 @@ void Player::handleInput(const uint8_t* state, float /*dt*/) {
         moveZ -= rightZ;
     }
 
-    // Normalizar movimiento horizontal
     float len = std::sqrt(moveX * moveX + moveZ * moveZ);
     if (len > 0.0f) {
         moveX = (moveX / len) * speed;
@@ -63,15 +62,13 @@ void Player::handleInput(const uint8_t* state, float /*dt*/) {
     vx = moveX;
     vz = moveZ;
 
-    // Salto clásico (Space)
     if (state[SDL_SCANCODE_SPACE] && isOnGround) {
-        vy = 8.5f; // Fuerza de salto clásica
+        vy = 8.5f;
         isOnGround = false;
     }
 }
 
-bool Player::checkCollision(float nx, float ny, float nz, const Chunk& chunk) const {
-    // Comprobar colisión AABB simple contra los bloques sólidos del chunk
+bool Player::checkCollision(float nx, float ny, float nz, const World& world) const {
     float halfW = width / 2.0f;
     
     int minX = static_cast<int>(std::floor(nx - halfW));
@@ -84,8 +81,8 @@ bool Player::checkCollision(float nx, float ny, float nz, const Chunk& chunk) co
     for (int cx = minX; cx <= maxX; ++cx) {
         for (int cy = minY; cy <= maxY; ++cy) {
             for (int cz = minZ; cz <= maxZ; ++cz) {
-                if (chunk.getBlock(cx, cy, cz) != BLOCK_AIR) {
-                    return true; // Colisión detectada
+                if (world.getBlock(cx, cy, cz) != BLOCK_AIR) {
+                    return true;
                 }
             }
         }
@@ -93,30 +90,26 @@ bool Player::checkCollision(float nx, float ny, float nz, const Chunk& chunk) co
     return false;
 }
 
-void Player::update(float dt, const Chunk& chunk) {
-    // Aplicar gravedad clásica (bloques/s^2)
+void Player::update(float dt, const World& world) {
     const float gravity = -25.0f;
     vy += gravity * dt;
 
-    // Movimiento en eje X con colisión
     float newX = x + vx * dt;
-    if (!checkCollision(newX, y, z, chunk)) {
+    if (!checkCollision(newX, y, z, world)) {
         x = newX;
     } else {
         vx = 0.0f;
     }
 
-    // Movimiento en eje Z con colisión
     float newZ = z + vz * dt;
-    if (!checkCollision(x, y, newZ, chunk)) {
+    if (!checkCollision(x, y, newZ, world)) {
         z = newZ;
     } else {
         vz = 0.0f;
     }
 
-    // Movimiento en eje Y con colisión
     float newY = y + vy * dt;
-    if (!checkCollision(x, newY, z, chunk)) {
+    if (!checkCollision(x, newY, z, world)) {
         y = newY;
         isOnGround = false;
     } else {

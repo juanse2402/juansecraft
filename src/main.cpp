@@ -5,6 +5,8 @@
 #include <cmath>
 #include "chunk.h"
 #include "player.h"
+#include "world.h"
+#include "menu.h"
 
 int main(int, char*[]) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -37,16 +39,15 @@ int main(int, char*[]) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     SDL_GL_SetSwapInterval(1);
 
-    // Capturar cursor para la vista en primera persona
-    SDL_SetRelativeMouseMode(SDL_TRUE);
-
     glEnable(GL_DEPTH_TEST);
 
-    Chunk sampleChunk;
-    sampleChunk.generateTestTerrain();
-
-    // Spawn del jugador en el centro del chunk, sobre la superficie (Y=65)
+    GameState gameState = STATE_MENU;
+    Menu menu;
+    World world;
     Player player(8.0f, 65.0f, 8.0f);
+
+    // Cargar chunk inicial alrededor del jugador
+    world.loadChunk(0, 0);
 
     Uint32 lastTime = SDL_GetTicks();
     bool running = true;
@@ -55,46 +56,74 @@ int main(int, char*[]) {
     while (running) {
         Uint32 currentTime = SDL_GetTicks();
         float dt = (currentTime - lastTime) / 1000.0f;
-        if (dt > 0.05f) dt = 0.05f; // Limitar delta time para estabilidad física
+        if (dt > 0.05f) dt = 0.05f;
         lastTime = currentTime;
 
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
+            if (event.type == SDL_QUIT) {
                 running = false;
             }
-            if (event.type == SDL_MOUSEMOTION) {
-                player.mouseMove(event.motion.xrel, event.motion.yrel);
+            if (gameState == STATE_MENU) {
+                if (event.type == SDL_KEYDOWN) {
+                    if (event.key.keysym.sym == SDLK_UP) {
+                        menu.handleInput(1);
+                    } else if (event.key.keysym.sym == SDLK_DOWN) {
+                        menu.handleInput(2);
+                    } else if (event.key.keysym.sym == SDLK_RETURN) {
+                        if (menu.selectedOption == 0) {
+                            gameState = STATE_PLAYING;
+                            SDL_SetRelativeMouseMode(SDL_TRUE);
+                        } else if (menu.selectedOption == 2) {
+                            running = false;
+                        }
+                    }
+                }
+            } else if (gameState == STATE_PLAYING) {
+                if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+                    gameState = STATE_MENU;
+                    SDL_SetRelativeMouseMode(SDL_FALSE);
+                }
+                if (event.type == SDL_MOUSEMOTION) {
+                    player.mouseMove(event.motion.xrel, event.motion.yrel);
+                }
             }
         }
 
-        const Uint8* keystate = SDL_GetKeyboardState(NULL);
-        player.handleInput(keystate, dt);
-        player.update(dt, sampleChunk);
+        if (gameState == STATE_PLAYING) {
+            const Uint8* keystate = SDL_GetKeyboardState(NULL);
+            player.handleInput(keystate, dt);
+            player.update(dt, world);
+        }
 
-        // Renderizado OpenGL 2.1
-        glClearColor(0.5f, 0.7f, 1.0f, 1.0f); // Color cielo clásico de Minecraft
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // Renderizado
+        if (gameState == STATE_MENU) {
+            glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            // Aquí se dibujaría el menú principal clásico
+        } else {
+            glClearColor(0.5f, 0.7f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        gluPerspective(70.0, 800.0 / 600.0, 0.1, 1000.0);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            gluPerspective(70.0, 800.0 / 600.0, 0.1, 1000.0);
 
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
 
-        // Calcular vista en primera persona
-        float radYaw = player.yaw * 3.1415926535f / 180.0f;
-        float radPitch = player.pitch * 3.1415926535f / 180.0f;
+            float radYaw = player.yaw * 3.1415926535f / 180.0f;
+            float radPitch = player.pitch * 3.1415926535f / 180.0f;
 
-        float lookX = player.x + std::cos(radYaw) * std::cos(radPitch);
-        float lookY = player.y + 1.62f + std::sin(radPitch); // 1.62 altura de ojos clásica
-        float lookZ = player.z + std::sin(radYaw) * std::cos(radPitch);
+            float lookX = player.x + std::cos(radYaw) * std::cos(radPitch);
+            float lookY = player.y + 1.62f + std::sin(radPitch);
+            float lookZ = player.z + std::sin(radYaw) * std::cos(radPitch);
 
-        gluLookAt(
-            player.x, player.y + 1.62f, player.z,
-            lookX, lookY, lookZ,
-            0.0f, 1.0f, 0.0f
-        );
+            gluLookAt(
+                player.x, player.y + 1.62f, player.z,
+                lookX, lookY, lookZ,
+                0.0f, 1.0f, 0.0f
+            );
+        }
 
         SDL_GL_SwapWindow(window);
     }
