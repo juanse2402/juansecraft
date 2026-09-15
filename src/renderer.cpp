@@ -13,11 +13,13 @@ void Renderer::init() {
 }
 
 void Renderer::renderWorld(const World& world, const Player& /*player*/) {
-    // Renderizado inmediato optimizado o cubo de prueba por cada bloque sólido del chunk
     for (auto& pair : world.chunks) {
         Chunk* chunk = pair.second;
-        int chunkX = pair.first.first;
-        int chunkZ = pair.first.second;
+        uint64_t key = pair.first;
+
+        // Desempaquetar clave de 64 bits en chunkX y chunkZ
+        int chunkX = (int)(key >> 32);
+        int chunkZ = (int)(key & 0xFFFFFFFF);
 
         int worldStartX = chunkX * CHUNK_SIZE_X;
         int worldStartZ = chunkZ * CHUNK_SIZE_Z;
@@ -32,9 +34,7 @@ void Renderer::renderWorld(const World& world, const Player& /*player*/) {
                     float wy = y;
                     float wz = worldStartZ + z;
 
-                    // Dibujar cubo simple con colores diferenciados por tipo de bloque
                     glBegin(GL_QUADS);
-                    // Colores según material clásico
                     if (block == BLOCK_GRASS) glColor3f(0.3f, 0.8f, 0.3f);
                     else if (block == BLOCK_DIRT) glColor3f(0.55f, 0.27f, 0.07f);
                     else if (block == BLOCK_STONE) glColor3f(0.5f, 0.5f, 0.5f);
