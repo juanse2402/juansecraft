@@ -23,4 +23,4 @@ file(GLOB SOURCES "src/*.cpp" "src/*.c")
 add_executable(voxel_engine ${SOURCES})
 
 # Enlace estático/dinámico para Windows (MinGW)
-target_link_libraries(voxel_engine -lmingw32 -lSDL2main -lSDL2 -lopengl32 -lglu32 -lm)
+target_link_libraries(voxel_engine -static-libgcc -static-libstdc++ -Wl,--subsystem,windows -lmingw32 -lSDL2main -lSDL2 -lopengl32 -lglu32 -lm)

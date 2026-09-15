@@ -1,6 +1,6 @@
 CXX = i686-w64-mingw32-g++
 CXXFLAGS = -march=i686 -mtune=pentium3 -mno-sse -mno-sse2 -O3 -Wall -Wextra -Ithird_party/SDL2/include
-LDFLAGS = -Lthird_party/SDL2/lib -static-libgcc -static-libstdc++ -lmingw32 -lSDL2main -lSDL2 -lopengl32 -lglu32 -lm
+LDFLAGS = -Lthird_party/SDL2/lib -static-libgcc -static-libstdc++ -Wl,--subsystem,windows -lmingw32 -lSDL2main -lSDL2 -lopengl32 -lglu32 -lm
 
 all: voxel_engine.exe
 
